@@ -10,7 +10,6 @@
             </small>
           </footer>
         </blockquote>
-
             <v-data-table
                 :headers="headers"
                 :items="this.messages"
@@ -19,17 +18,27 @@
             >
                 <template slot="items" slot-scope="props">
                     <td>{{ props.item.name }}</td>
-                    <td class="text-xs-right">{{ props.item.text }}</td>
                     <td class="text-xs-right">
                         <a @click.prevent="deleteMessage(props.item.id)" href="#" class="card-link">Delete</a>
                     </td>
                     <td class="text-xs-right">
-                        <a @click.prevent="editMessage(props.item.id)" href="#" class="card-link">Edit</a>
+                        <a @click.prevent="editMessage(props.item)" href="#" class="card-link">Edit</a>
                     </td>
+                    <td v-if="props.item !== editingMessage"  class="text-xs-right">{{ props.item.text }}</td>
+                   <div v-else>
+                     <textarea v-model="messageText"></textarea>
+                     <td class="text-xs-right">
+                        <a @click.prevent="cancelEditing" href="#" class="card-link">Cancel</a>
+                    </td>
+                    <td class="text-xs-right">
+                        <a @click.prevent="updateMessage" href="#" class="card-link">Update</a>
+                    </td>
+                   </div>
+                   
                 </template>
             </v-data-table>
 
-          <v-form @submit.prevent="storeMessage">
+          <v-form v-if="!editingMessage" @submit.prevent="storeMessage">
             <v-flex xs8>
               <v-text-field v-model="messageText" label="Message"></v-text-field>
             </v-flex>
@@ -61,6 +70,7 @@ export default {
       messages: [],
       messageText: '',
       nickname: 'ianm',
+      editingMessage: null,
       headers: [
         {
           text: 'Message',
@@ -85,6 +95,18 @@ export default {
     deleteMessage (id) {
       console.log(db.ref('messages'))
       db.ref('messages').child(id).remove()
+    },
+    editMessage (id) {
+      this.editingMessage = id
+      this.messageText = id.text
+    },
+    cancelEditing () {
+      this.editingMessage = null
+      this.messageText = ''
+    },
+    updateMessage () {
+      db.ref('messages').child(this.editingMessage.id).update({ text: this.messageText })
+      this.cancelEditing()
     }
   },
   created () {
@@ -94,6 +116,10 @@ export default {
       const deletedMessage = this.messages.find(message => message.id === snapshot.key)
       const index = this.messages.indexOf(deletedMessage)
       this.messages.splice(index, 1)
+    })
+    db.ref('messages').on('child_changed', snapshot => {
+      const updatedMessage = this.messages.find(message => message.id === snapshot.key)
+      updatedMessage.text = snapshot.val().text
     })
   }
 }
