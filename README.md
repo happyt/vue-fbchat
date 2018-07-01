@@ -23,3 +23,12 @@ yarn add vue-toasted
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 
 material icons are included in build
+
+to update several,
+const payload = {}
+payload['users/abcdefgh/nickname'] = 'john'
+payload['messages/123456789/nickname'] = 'john'
+payload['messages/123456790/nickname'] = 'john'
+payload['messages/123456791/nickname'] = 'john'
+database.ref().update(payload)
+
