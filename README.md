@@ -1,6 +1,6 @@
 # vue-fbchat
 
-> Vue fb chat with fb database
+> Vue fb chat with fb database (older version)
 
 ## Build Setup
 
